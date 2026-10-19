@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ration_rotation
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      TZ: Europe/Stockholm
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d ration_rotation"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - app-network
+
+  signal-cli:
+    image: ghcr.io/asamk/signal-cli:0.14.8
+    command: daemon --receive-mode=manual --http 0.0.0.0:7583
+    tmpfs:
+      - /tmp:exec
+    ports:
+      - "7583:7583"
+    volumes:
+      - ./signal-config:/var/lib/signal-cli:rw
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash -c 'exec 3<>/dev/tcp/localhost/7583; printf \"GET /api/v1/check HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n\" >&3; cat <&3>/tmp/check.tmp; grep -q \"200 OK\" /tmp/check.tmp > /dev/null'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      target: runtime
+    command: ["./server"]
+    environment:
+      TZ: Europe/Stockholm
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+      signal-cli:
+        condition: service_healthy
+    volumes:
+      - ./backend/config.json:/app/config.json:r
+    networks:
+      - app-network
+
+networks:
+  app-network:

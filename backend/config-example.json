@@ -1,0 +1,23 @@
+{
+	"database": {
+		"url": "postgresql://user:password@postgres:5432/ration_rotation?sslmode=disable",
+		"create_tables_if_missing": true
+	},
+	"server": {
+		"address": "0.0.0.0",
+		"port": 8080,
+		"cors_allowed_origins": {"http://localhost": {}, "http://localhost:3000": {}},
+		"tz": "Europe/Stockholm",
+		"domain": {
+		  "base": "http://localhost:8080",
+			"prefix": ""
+		}
+	},
+	"signal": {
+		"endpoint": "http://signal-cli:7583",
+		"to": "+015556666"
+	},
+	"warning": {
+		"check_interval_minutes": 45
+	}
+}

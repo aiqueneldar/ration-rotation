@@ -1,0 +1,6 @@
+# Ignore system specific config
+config.json
+signal-config/
+
+# Don't include AI review folder
+ai/
