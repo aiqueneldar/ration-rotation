@@ -1,0 +1,175 @@
+/* App.css - Dashboard Dark Theme Styles */
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+  color: #f9fafb; /* Light text */
+}
+
+.header p {
+  color: #9ca3af; /* Muted gray */
+}
+
+/* Days left - highlight for expired items */
+.days-left.positive {
+  color: #10b981; /* Green for positive days */
+}
+
+.days-expired.negative {
+  color: #f87171; /* Red for negative/expired */
+}
+
+/* Table Styles - Dark Background */
+.ration-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1f2937; /* Dark gray background */
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.ration-table th {
+  background-color: #111827; /* Even darker header */
+  color: #f3f4f6; /* Light text */
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 2px solid #374151;
+}
+
+/* Alternating row colors in dark mode */
+.ration-table tbody tr:nth-child(odd) {
+  background-color: #1f2937; /* Dark gray for odd rows */
+}
+
+.ration-table tbody tr:nth-child(even) {
+  background-color: #181f2e; /* Slightly darker for even rows */
+}
+
+/* Hover effect on rows */
+.ration-table tbody tr:hover {
+  background-color: #374151 !important; /* Highlight on hover */
+}
+
+.ration-table td {
+  padding: 12px 16px;
+  color: #e5e7eb; /* Light text */
+  border-bottom: 1px solid #374151; /* Subtle separator */
+}
+
+/* Status symbols - Dark mode colored, no background boxes */
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.status-icon.normal {
+  background-color: #059669; /* Medium green */
+  color: #dcfce7; /* Light green text */
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.3); /* Subtle glow */
+}
+
+.status-icon.warning {
+  background-color: #d97706; /* Amber */
+  color: #fef3c7; /* Light yellow text */
+  box-shadow: 0 0 10px rgba(217, 119, 6, 0.3);
+}
+
+.status-icon.expired {
+  background-color: #dc2626; /* Red */
+  color: #fef2f2; /* Light red text */
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+}
+
+/* Quantity column */
+.quantity {
+  font-family: 'monospace', monospace;
+  font-size: 1.05em;
+  color: #f3f4f6;
+}
+
+/* Date column */
+.date {
+  color: #9ca3af;
+  font-size: 0.9em;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #374151;
+  color: #6b7280;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+/* Optional: Add some spacing for better readability */
+.ration-table th:nth-child(1),
+.ration-table td:nth-child(1) {
+  min-width: 60px; /* Status column */
+}
+
+.ration-table th:nth-child(2),
+.ration-table td:nth-child(2) {
+  min-width: 120px; /* Name column */
+}
+
+.ration-table th:nth-child(3),
+.ration-table td:nth-child(3) {
+  min-width: 80px; /* Quantity column */
+}
+
+/* Container for the arrow indicator */
+.sort-indicator {
+  margin-left: 2px;            /* Space between text and arrow */
+  font-size: 1em;             /* Smaller arrows */
+  color: #9ca3af;               /* Muted gray by default */
+  vertical-align: top;       /* Center vertically with text */
+}
+
+/* Active sort indicator (when column is currently being sorted) */
+.sort-indicator.active {
+  font-weight: bold;           /* Make arrow more visible */
+  letter-spacing: -0.5px;      /* Tighten the arrows slightly */
+}
+
+/* Ascending sort - up arrow */
+.sort-indicator[data-direction="asc"] {
+  color: #60a5fa;              /* Blue for ascending */
+}
+
+/* Descending sort - down arrow */
+.sort-indicator[data-direction="desc"] {
+  color: #fbbf24;              /* Amber/yellow for descending */
+}
+
+/* Optional: Add subtle transition for smooth color change */
+.sort-indicator {
+  transition: color 0.8s ease;
+}
