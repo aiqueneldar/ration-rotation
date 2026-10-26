@@ -1,6 +1,18 @@
 import { useState, useMemo, useEffect } from "react";
 import "./App.css";
-import { fetchItems } from "./api/items";
+import { useQuery } from "@tanstack/react-query";
+import { getItems } from "./api/items";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import relativeTime from "dayjs/plugin/relativeTime";
+import sv from "dayjs/locale/sv"
+
+// Extend Day.js with plugins
+dayjs.extend(localizedFormat);
+dayjs.extend(relativeTime);
+// Set Day.js to use the user's locale
+const userLocale = navigator.language || 'sv-SE'
+console.log(`User locale set to: ${userLocale}`);
 
 export interface Item {
   id: string;
@@ -121,6 +133,10 @@ function getSortedItems(
   return sorted;
 }
 
+const formatDate = (dateStr: string) => {
+  return dayjs(dateStr).locale(userLocale).format("L");
+};
+
 // ============================================
 // Main Component - ALL hooks here!
 // ============================================
@@ -135,58 +151,30 @@ function App() {
     direction: "asc",
   });
 
-  // Track processed items and loading state
-  const [items, setItems] = useState<ItemWithCalculated[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const itemsQuery = useQuery({
+    queryKey: ["items"], // Cache key for invalidation
+    queryFn: getItems, // Function that fetches data
+  });
 
-  // ============================================
-  // Fetch data when component mounts
-  // ============================================
-  useEffect(() => {
-    let cancelled = false;
+  // Destructure for clean access
+  const { data: rawItems, isLoading, error } = itemsQuery;
 
-    async function loadItems() {
-      try {
-        // Call the API service (NO await here - we handle response in then)
-        const rawItems: Item[] = await fetchItems();
+  const itemsWithCalculations = useMemo(() => {
+    if (!rawItems) return [];
 
-        if (cancelled) return; // Component unmounted, ignore result
-
-        // Process items with calculations
-        const processedItems: ItemWithCalculated[] = rawItems.map((item) => ({
-          ...item,
-          daysUntilExpiry: getDaysUntilExpiry(item.best_before_date),
-          status: getExpireStatus(
-            getDaysUntilExpiry(item.best_before_date),
-            item.days_before_warning ?? 7,
-          ),
-        }));
-
-        // Update state with processed items
-        setItems(processedItems);
-      } catch (err) {
-        console.error("Failed to fetch items:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
-
-        if (!cancelled) {
-          // On error, still load empty array so UI can show "no items"
-          setItems([]);
-        }
-      }
-    }
-
-    loadItems();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []); // Empty dependency array - run once on mount
+    return rawItems.map((item) => ({
+      ...item,
+      daysUntilExpiry: getDaysUntilExpiry(item.best_before_date),
+      status: getExpireStatus(
+        getDaysUntilExpiry(item.best_before_date),
+        item.days_before_warning ?? 7,
+      ),
+    }));
+  }, [rawItems]); // Re-run when raw data changes
 
   const sortedItems = useMemo(() => {
-      if (!items) return []; // Nothing to sort yet
-
-      return getSortedItems(items, sortConfig);
-    }, [items, sortConfig]);
+    return getSortedItems(itemsWithCalculations, sortConfig);
+  }, [itemsWithCalculations, sortConfig]);
 
   // Sort handler
   function handleSort(key: keyof ItemWithCalculated) {
@@ -201,6 +189,42 @@ function App() {
         direction: "asc",
       });
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="app">
+        <header className="header">
+          <h1>📦 Ration Rotation Dashboard</h1>
+          <p>Loading items from API...</p>
+        </header>
+
+        <main className="dashboard">
+          <div className="empty-state">Loading inventory...</div>
+        </main>
+
+        <footer className="footer">
+          <p>Please wait while we fetch your data.</p>
+        </footer>
+      </div>
+    );
+  } else if (error) {
+    return (
+      <div className="app">
+        <header className="header">
+          <h1>📦 Ration Rotation Dashboard</h1>
+          <p style={{ color: "red" }}>Error: {(error as Error).message}</p>
+        </header>
+
+        <main className="dashboard">
+          <div className="empty-state">Failed to load items</div>
+        </main>
+
+        <footer className="footer">
+          <p>Data failed to load. Check your backend connection.</p>
+        </footer>
+      </div>
+    );
   }
 
   return (
@@ -297,7 +321,7 @@ function App() {
                   onClick={() => handleSort("daysUntilExpiry")}
                   style={{ cursor: "pointer" }}
                 >
-                  Days Left
+                  Expires
                   {sortConfig.key === "daysUntilExpiry" && (
                     <span
                       className="sort-indicator"
@@ -328,10 +352,10 @@ function App() {
                   <td className="quantity">{item.quantity}</td>
                   <td className="date">
                     {item.best_before_date
-                      ? new Date(item.best_before_date).toLocaleDateString()
+                      ? formatDate(item.best_before_date)
                       : "No date"}
                   </td>
-                  <td>{item.daysUntilExpiry}</td>
+                  <td>{dayjs(item.best_before_date).fromNow()}</td>
                 </tr>
               ))}
             </tbody>
@@ -340,7 +364,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>Mock data - will connect to API soon!</p>
+        <p>{error ? "Connection failed." : "Data loaded from backend API!"}</p>
       </footer>
     </div>
   );

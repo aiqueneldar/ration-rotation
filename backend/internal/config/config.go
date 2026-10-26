@@ -21,11 +21,11 @@ type DatabaseConfig struct {
 }
 
 type ServerConfig struct {
-	Address     string              `json:"address"`
-	Port        int                 `json:"port"`
-	CORSOrigins map[string]struct{} `json:"cors_allowed_origins"`
-	TZ          string              `json:"tz"`
-	Domain      DomainConfig        `json:"domain"`
+	Address     string       `json:"address"`
+	Port        int          `json:"port"`
+	CORSOrigins []string     `json:"cors_allowed_origins"`
+	TZ          string       `json:"tz"`
+	Domain      DomainConfig `json:"domain"`
 }
 
 type DomainConfig struct {
@@ -86,7 +86,7 @@ func Load() (*Config, error) {
 
 	if originEnv := os.Getenv("CORS_ORIGINS"); originEnv != "" {
 		for origin := range strings.SplitSeq(originEnv, ":") {
-			LoadedConfig.Server.CORSOrigins[origin] = struct{}{}
+			LoadedConfig.Server.CORSOrigins = append(LoadedConfig.Server.CORSOrigins, origin)
 		}
 	}
 

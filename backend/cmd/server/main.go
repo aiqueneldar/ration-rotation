@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"log"
-	"maps"
 	"net/http"
 	"os"
 	"os/signal"
-	"slices"
 	"strconv"
 	"sync"
 	"syscall"
@@ -165,7 +163,7 @@ func setupGinRouter(hdlr handlers, cfg *config.Config) *gin.Engine {
 
 	//Add security middle ware and fixs
 	api.Use(cors.New(cors.Config{
-		AllowOrigins:     slices.Collect(maps.Keys(cfg.Server.CORSOrigins)),
+		AllowOrigins:     cfg.Server.CORSOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "Forwarded", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

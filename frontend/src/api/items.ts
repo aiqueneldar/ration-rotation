@@ -12,8 +12,7 @@ const API_URL =
 // For now, returns mock data to keep existing code working
 // ============================================
 
-export async function fetchItems(): Promise<Item[]> {
-  try {
+export async function getItems(): Promise<Item[]> {
     const response = await fetch(`${API_URL}/items`);
 
     if (!response.ok) {
@@ -21,10 +20,4 @@ export async function fetchItems(): Promise<Item[]> {
     }
 
     return await response.json();
-
-  } catch (error) {
-    console.error("Failed to fetch items:", error);
-    // Fallback to empty array on error
-    return [];
-  }
 }
